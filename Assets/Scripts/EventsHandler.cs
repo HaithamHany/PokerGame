@@ -9,12 +9,15 @@ public class EventsHandler : MonoBehaviour
     public static EventsHandler Instance => _instance;
     
     //Events
-    public event Action<int> OnActivatingObject;
-    public event Action<int> OnDeactivatingObject;
-    public event Action<EPlayer, float> OnPlayerPlacedBet;
+    public event Action<int> OnPlayerPlacedBet;
+    public event Action<int> OnPlayerRemovedBet;
     public event Action OnAllBetsPlaced;
     public event Action<EPlayer> OnPlayerTurn;
     public event Action<ERoundResult> OnRoundDone;
+    public event Action OnBettingObjectStarted;
+    public event Action OnBettingObjectEnded;
+    public event Action OnStackCreated;
+    public event Action OnBetCanceled;
 
 
     private void Awake()
@@ -30,26 +33,19 @@ public class EventsHandler : MonoBehaviour
         }
     }
     
-    public void ActivatingObject(int objId)
-    {
-        if(OnActivatingObject != null)
-        {
-            OnActivatingObject(objId);
-        }
-    }
-    public void DeactivatingObject(int objId)
-    {
-        if (OnDeactivatingObject != null)
-        {
-            OnDeactivatingObject(objId);
-        }
-    }
-    
-    public void DeactivatingObject(EPlayer player, float amount)
+    public void PlayerPlacedBet(int amount)
     {
         if (OnPlayerPlacedBet != null)
         {
-            OnPlayerPlacedBet(player, amount);
+            OnPlayerPlacedBet(amount);
+        }
+    }
+    
+    public void PlayerRemovedBet(int amount)
+    {
+        if (OnPlayerRemovedBet != null)
+        {
+            OnPlayerRemovedBet(amount);
         }
     }
     
@@ -69,11 +65,35 @@ public class EventsHandler : MonoBehaviour
         }
     }
     
-    public void RoundResult(ERoundResult result)
+    public void BettingObjectStarted()
     {
-        if (OnRoundDone != null)
+        if (OnBettingObjectStarted != null)
         {
-            OnRoundDone(result);
+            OnBettingObjectStarted();
+        }
+    }
+    
+    public void BettingObjectEnded()
+    {
+        if (OnBettingObjectEnded != null)
+        {
+            OnBettingObjectEnded();
+        }
+    }
+    
+    public void StackCreated()
+    {
+        if (OnStackCreated != null)
+        {
+            OnStackCreated();
+        }
+    }
+    
+    public void BetCanceled()
+    {
+        if (OnBetCanceled != null)
+        {
+            OnBetCanceled();
         }
     }
 }
