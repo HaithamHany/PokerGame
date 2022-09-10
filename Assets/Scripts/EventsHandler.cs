@@ -18,6 +18,7 @@ public class EventsHandler : MonoBehaviour
     public event Action OnBettingObjectEnded;
     public event Action OnStackCreated;
     public event Action OnBetCanceled;
+    public event Action OnChangeColorRequested;
 
 
     private void Awake()
@@ -94,6 +95,14 @@ public class EventsHandler : MonoBehaviour
         if (OnBetCanceled != null)
         {
             OnBetCanceled();
+        }
+    }
+    
+    public void ChangeColorRequest()
+    {
+        if (OnChangeColorRequested != null)
+        {
+            OnChangeColorRequested();
         }
     }
 }
