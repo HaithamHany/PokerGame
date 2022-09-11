@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Photon;
 using TMPro;
 using UnityEngine;
+using Random = System.Random;
 
 public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
 {
@@ -90,9 +91,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
             //Show remote bet then flip coin
             _remoteBetDisplay.text = _remoteBet.ToString();
             Debug.Log("Flip Coin...");
-            //temporary
-            _coinSide = EBetObjectSide.Red;
-
+    
         }
         else
         {
@@ -158,6 +157,9 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     public void OnTurnBegins(int turn)
     {
         Debug.Log("OnTurnBegins() turn: "+ turn);
+        _rotatingBetObject.gameObject.SetActive(false);
+        _greenBetObject.SetActive(false);
+        _redBetObject.SetActive(false);
         _localSelection = EBetObjectSide.None;
         _remoteSelection = EBetObjectSide.None;
 
@@ -178,6 +180,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         UpdateScores();
         OnEndTurn();
     }
+    
 
     public void OnPlayerMove(PhotonPlayer player, int turn, object move)
     {
@@ -211,6 +214,10 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     private void CalculateWinAndLoss()
     {
         _result = EResult.Draw;
+        
+        var randomTossSelection = UnityEngine.Random.Range(1, 2);
+        _coinSide = (EBetObjectSide) randomTossSelection;
+        
         if (_localSelection == _remoteSelection) return;
         
         if (_localSelection == EBetObjectSide.None)
@@ -255,7 +262,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     
     public void OnEndTurn()
     {
-        this.StartCoroutine(ShowResultsBeginNextTurnCoroutine());
+        StartCoroutine(ShowResultsBeginNextTurnCoroutine());
     }
     
     private IEnumerator ShowResultsBeginNextTurnCoroutine()
@@ -263,11 +270,14 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         _bettingPanelCanvasGroup.interactable = false;
         _isShowingResults = true;
         // yield return new WaitForSeconds(1.5f);
+        _rotatingBetObject.SetActive(true);
+        yield return Toss();
         
         if (_result == EResult.Draw)
         {
             _resultText.text = $"DRAW!";
         }
+        
         else
         {
             _resultText.text = _result == EResult.Win ? "YOU WIN!" : "YOU LOSE!";
@@ -277,6 +287,16 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         yield return new WaitForSeconds(2.0f);
 
         StartTurn();
+    }
+    
+    private IEnumerator Toss()
+    {
+        yield return new WaitForSeconds(4);
+        _rotatingBetObject.SetActive(false);
+        _greenBetObject.SetActive(_coinSide == EBetObjectSide.Green);
+        _redBetObject.SetActive(_coinSide == EBetObjectSide.Red);
+
+        yield return new WaitForSeconds(2);
     }
     
     // public IEnumerator CycleRemoteHandCoroutine()
