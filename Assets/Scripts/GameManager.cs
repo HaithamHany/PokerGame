@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
     
     private const int MAX_STACKS_LIMIT = 10;
     private const int BET_INCREMENT = 10;
+    
 
     private void Start()
     {
