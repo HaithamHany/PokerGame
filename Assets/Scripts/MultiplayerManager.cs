@@ -70,7 +70,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         {
             //Show remote bet 
             _remoteBetDisplay.text = _remoteBet.ToString();
-            Debug.Log("Flip Coin...");
+            Debug.Log("Flip betting object...");
         }
         else
         {
