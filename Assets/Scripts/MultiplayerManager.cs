@@ -123,7 +123,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
 
             if (_turnText != null)
             {
-                _turnText.text = _turnManager.Turn.ToString();
+                _turnText.text = $"Turn: {_turnManager.Turn.ToString()}";
             }
 
             if (_turnManager.Turn > 0 && _timerDisplayText != null && ! _isShowingResults)
