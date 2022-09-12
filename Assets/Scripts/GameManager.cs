@@ -19,8 +19,7 @@ public class GameManager : MonoBehaviour
     [Header("Bet Handling")] [Space] 
     [SerializeField] private TextMeshProUGUI _betAmountTxt;
     [SerializeField] private Button _addBetButton;
-    [SerializeField] private Button _removeBetButton;
-    
+
     //betting stacks
     private List<Stack> _localBettingStacks = new List<Stack>();
     private List<Stack> _remoteBettingStacks = new List<Stack>();
@@ -43,13 +42,7 @@ public class GameManager : MonoBehaviour
             EventsHandler.Instance.PlayerPlacedBet(BET_INCREMENT);
         });
         
-        _removeBetButton.onClick.AddListener(() =>
-        {
-            EventsHandler.Instance.PlayerRemovedBet(BET_INCREMENT);
-        });
-
         EventsHandler.Instance.OnPlayerPlacedBet += PlaceBet;
-        EventsHandler.Instance.OnPlayerRemovedBet += RemoveBet;
         EventsHandler.Instance.OnRemotePlayerPlacedBet += RemotePlayerPlacedBet;
         GenerateStacks(LOCAL_X_OFFSET, LOCAL_Z_OFFSET, _localBettingStacks);
         GenerateStacks(REMOTE_X_OFFSET, REMOTE_Z_OFFSET, _remoteBettingStacks);
@@ -80,17 +73,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    private void RemoveBet(int amount)
-    {
-        if (_currentLocalStack > 0 )
-        {
-            _localBetPlacedAmount -= amount;
-            UpdateVisual();
-            _currentLocalStack--;
-            _localBettingStacks[_currentLocalStack].gameObject.SetActive(true);
-            EventsHandler.Instance.BetAmountChanged(_localBetPlacedAmount);
-        }
-    }
     
     private void RemotePlayerPlacedBet()
     {
@@ -109,7 +91,6 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         EventsHandler.Instance.OnPlayerPlacedBet -= PlaceBet;
-        EventsHandler.Instance.OnPlayerPlacedBet -= RemoveBet;
         EventsHandler.Instance.OnRemotePlayerPlacedBet += RemotePlayerPlacedBet;
     }
 }
