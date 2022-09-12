@@ -357,6 +357,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
             object[] data = (object[])content;
             var amount = (int)data[0];
             UpdateRemoteVisual(amount);
+            EventsHandler.Instance.RemotePlayerPlacedBet();
         }
     }
     

@@ -12,6 +12,7 @@ public class EventsHandler : MonoBehaviour
     public event Action<int> OnPlayerPlacedBet;
     public event Action<int> OnPlayerRemovedBet;
     public event Action<int> OnBetAmountChanged;
+    public event Action OnRemotePlayerPlacedBet;
     public event Action OnAllBetsPlaced;
     public event Action<EPlayer> OnPlayerTurn;
     public event Action<ERoundResult> OnRoundDone;
@@ -112,6 +113,14 @@ public class EventsHandler : MonoBehaviour
         if (OnChangeColorRequested != null)
         {
             OnChangeColorRequested();
+        }
+    }
+    
+    public void RemotePlayerPlacedBet()
+    {
+        if (OnRemotePlayerPlacedBet != null)
+        {
+            OnRemotePlayerPlacedBet();
         }
     }
 }
