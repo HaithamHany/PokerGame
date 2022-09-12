@@ -70,6 +70,7 @@ public class GameManager : MonoBehaviour
             UpdateVisual();
             _bettingStacks[_currentStack].gameObject.SetActive(false);
             _currentStack++;
+            EventsHandler.Instance.BetAmountChanged(_betPlacedAmount);
         }
     }
     
@@ -81,6 +82,7 @@ public class GameManager : MonoBehaviour
             UpdateVisual();
             _currentStack--;
             _bettingStacks[_currentStack].gameObject.SetActive(true);
+            EventsHandler.Instance.BetAmountChanged(_betPlacedAmount);
         }
     }
 

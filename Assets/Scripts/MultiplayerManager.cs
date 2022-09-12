@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
 using Photon;
 using TMPro;
 using UnityEngine;
@@ -21,6 +22,8 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     [SerializeField] private GameObject _greenBetObject;
     [SerializeField] private GameObject _redBetObject;
     [SerializeField] private TextMeshProUGUI _resultText;
+    [SerializeField] private GameObject _remoteBetPlacedImage;
+    [SerializeField] private GameObject _localBetPlacedImage;
     
     private PunTurnManager _turnManager;
     private float _timeCounter;
@@ -30,7 +33,13 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     private EBetObjectSide _localSelection;
     private EBetObjectSide _remoteSelection;
     private EBetObjectSide _coinSide;
+    private EBetObjectSide _remoteCoinSide;
+    private EBetObjectSide _localCoinSide;
     private EResult _result;
+    private EPlayer _playerId = EPlayer.None;
+    
+    private readonly byte SendRandomResult = 0;
+    private readonly byte BetAmountUpdated = 10;
 
     public int RemoteBet => _remoteBet;
         
@@ -38,11 +47,11 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     {
         _turnManager = gameObject.AddComponent<PunTurnManager>();
         _turnManager.TurnManagerListener = this;
-        _turnManager.TurnDuration = 30f;
+        _turnManager.TurnDuration = 190f;
         
         _remoteBetDisplay.gameObject.SetActive(false);
-        _localBetDisplay .gameObject.SetActive(false);
         RefreshUIViews();
+        EventsHandler.Instance.OnBetAmountChanged += BetAmountChanged;
     }
 
     private void Update()
@@ -140,7 +149,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
 
         if (remote != null)
         {
-            _remotePlayerNameDisplay.text = $"{remote.NickName}      {remote.GetScore():D2}";
+            _remotePlayerNameDisplay.text = $"{remote.NickName}  {remote.GetScore():D2}";
         }
         else
         {
@@ -157,6 +166,8 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     public void OnTurnBegins(int turn)
     {
         Debug.Log("OnTurnBegins() turn: "+ turn);
+        _localBetPlacedImage.SetActive(false);
+        _remoteBetPlacedImage.SetActive(false);
         _rotatingBetObject.gameObject.SetActive(false);
         _greenBetObject.SetActive(false);
         _redBetObject.SetActive(false);
@@ -195,10 +206,12 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         if (player.IsLocal)
         {
             _localSelection = (EBetObjectSide)(byte)move;
+            _localBetPlacedImage.SetActive(true);
         }
         else
         {
             _remoteSelection = (EBetObjectSide)(byte)move;
+            _remoteBetPlacedImage.SetActive(true);
         }
     }
 
@@ -214,10 +227,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     private void CalculateWinAndLoss()
     {
         _result = EResult.Draw;
-        
-        var randomTossSelection = UnityEngine.Random.Range(1, 2);
-        _coinSide = (EBetObjectSide) randomTossSelection;
-        
+
         if (_localSelection == _remoteSelection) return;
         
         if (_localSelection == EBetObjectSide.None)
@@ -227,15 +237,14 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         }
 
         if (_remoteSelection == EBetObjectSide.None) _result = EResult.Win;
-
         
-        if (_localSelection == EBetObjectSide.None)
-        {
-            _result = (_remoteSelection == _coinSide) ? EResult.Win :  EResult.Loss;
-        }
         if (_localSelection == _coinSide)
         {
-            _result = (_remoteSelection != _coinSide) ? EResult.Win : EResult.Loss;
+            _result = EResult.Win;
+        }
+        else
+        {
+            _result = EResult.Loss;
         }
     }
     
@@ -251,6 +260,8 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     {
         if (PhotonNetwork.isMasterClient)
         {
+            //Generate game results for all clients
+            GenerateGameResult(); 
             _turnManager.BeginTurn();
         }
     }
@@ -318,7 +329,35 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
 
     public void OnClickGreenSide()
     {
-        this.MakeTurn(EBetObjectSide.Green);
+        MakeTurn(EBetObjectSide.Green);
+    }
+    
+    private void GenerateGameResult()
+    {
+        var randomTossSelection = UnityEngine.Random.Range(1, 3);
+        _coinSide = (EBetObjectSide) randomTossSelection;
+        
+        object[] content = new object[] { _coinSide };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All }; 
+        PhotonNetwork.RaiseEvent(SendRandomResult, content,true, raiseEventOptions);
+    }
+    
+    public void OnEvent(byte eventCode, object content, int senderId)
+    {
+        if (eventCode == SendRandomResult)
+        {
+            object[] data = (object[])content;
+            
+            EBetObjectSide coinSide = (EBetObjectSide)data[0];
+            _coinSide = coinSide;
+        }
+
+        if (eventCode == BetAmountUpdated)
+        {
+            object[] data = (object[])content;
+            var amount = (int)data[0];
+            UpdateRemoteVisual(amount);
+        }
     }
     
     public void OnClickConnect()
@@ -362,13 +401,13 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
     {
         Debug.Log("Other player arrived");
-
+        
         if (PhotonNetwork.room.PlayerCount == 2)
         {
             if (_turnManager.Turn == 0)
             {
                 // when the room has two players, start the first turn (later on, joining players won't trigger a turn)
-                this.StartTurn();
+                StartTurn();
             }
         }
     }
@@ -377,11 +416,34 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     {
         Debug.Log("Other player disconnected! "+otherPlayer.ToStringFull());
     }
-
-
+    
     public override void OnConnectionFail(DisconnectCause cause)
     {
         _disconnectedPanel.gameObject.SetActive(true);
+    }
+    
+    public void OnEnable()
+    {
+        PhotonNetwork.OnEventCall += OnEvent;
+    }
+
+    public void OnDisable()
+    {
+        PhotonNetwork.OnEventCall -= OnEvent;
+        EventsHandler.Instance.OnBetAmountChanged += BetAmountChanged;
+    }
+
+    private void BetAmountChanged(int amount)
+    {
+        object[] content = new object[] { amount };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others}; 
+        PhotonNetwork.RaiseEvent(BetAmountUpdated, content,true , raiseEventOptions);
+    }
+
+    private void UpdateRemoteVisual(int betAmount)
+    {
+        _remoteBetDisplay.gameObject.SetActive(true);
+        _remoteBetDisplay.text = $"${betAmount.ToString()}";
     }
 }
 

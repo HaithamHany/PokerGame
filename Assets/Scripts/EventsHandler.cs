@@ -11,6 +11,7 @@ public class EventsHandler : MonoBehaviour
     //Events
     public event Action<int> OnPlayerPlacedBet;
     public event Action<int> OnPlayerRemovedBet;
+    public event Action<int> OnBetAmountChanged;
     public event Action OnAllBetsPlaced;
     public event Action<EPlayer> OnPlayerTurn;
     public event Action<ERoundResult> OnRoundDone;
@@ -50,6 +51,14 @@ public class EventsHandler : MonoBehaviour
         }
     }
     
+    public void BetAmountChanged(int amount)
+    {
+        if (OnBetAmountChanged != null)
+        {
+            OnBetAmountChanged(amount);
+        }
+    }
+
     public void AllBetsPlaced()
     {
         if (OnAllBetsPlaced != null)
@@ -109,8 +118,9 @@ public class EventsHandler : MonoBehaviour
 
 public enum EPlayer
 {
-    Player01 = 0,
-    Player02 = 1
+    None = 0,
+    Player01 = 1,
+    Player02 = 2
 }
 
 public enum ERoundResult
