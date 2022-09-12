@@ -7,11 +7,6 @@ using Random = UnityEngine.Random;
 public class Stack : MonoBehaviour
 {
     [SerializeField] private Renderer _renderer;
-
-    private void Start()
-    {
-        EventsHandler.Instance.OnChangeColorRequested += ChangeColorRequested;
-    }
     
     public void Init()
     {
@@ -23,18 +18,4 @@ public class Stack : MonoBehaviour
         return Random.ColorHSV();
     }
     
-    private void ChangeColorRequested()
-    {
-        UpdateVisuals();
-    }
-
-    private void UpdateVisuals()
-    {
-        _renderer.material.color += GenerateRandomColor();
-    }
-
-    private void OnDestroy()
-    {
-        EventsHandler.Instance.OnChangeColorRequested -= ChangeColorRequested;
-    }
 }

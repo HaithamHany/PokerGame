@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
         EventsHandler.Instance.OnPlayerPlacedBet += PlaceBet;
         EventsHandler.Instance.OnRemotePlayerPlacedBet += RemotePlayerPlacedBet;
         EventsHandler.Instance.OnTurnStarted += OnTurnStarted;
+        
         GenerateStacks(LOCAL_X_OFFSET, LOCAL_Z_OFFSET, _localBettingStacks);
         GenerateStacks(REMOTE_X_OFFSET, REMOTE_Z_OFFSET, _remoteBettingStacks);
     }
@@ -111,7 +112,7 @@ public class GameManager : MonoBehaviour
         stackTracker = 0;
         foreach (var stack in bettingStacks)
         {
-            //reusing already instantiated stacks
+            //recycling already instantiated stacks
             stack.gameObject.SetActive(true); 
         }
     }

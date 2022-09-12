@@ -10,18 +10,9 @@ public class EventsHandler : MonoBehaviour
     
     //Events
     public event Action<int> OnPlayerPlacedBet;
-    public event Action<int> OnPlayerRemovedBet;
     public event Action<int> OnBetAmountChanged;
     public event Action OnRemotePlayerPlacedBet;
     public event Action OnTurnStarted;
-    public event Action OnAllBetsPlaced;
-    public event Action<EPlayer> OnPlayerTurn;
-    public event Action<ERoundResult> OnRoundDone;
-    public event Action OnBettingObjectStarted;
-    public event Action OnBettingObjectEnded;
-    public event Action OnStackCreated;
-    public event Action OnBetCanceled;
-    public event Action OnChangeColorRequested;
 
 
     private void Awake()
@@ -45,14 +36,6 @@ public class EventsHandler : MonoBehaviour
         }
     }
     
-    public void PlayerRemovedBet(int amount)
-    {
-        if (OnPlayerRemovedBet != null)
-        {
-            OnPlayerRemovedBet(amount);
-        }
-    }
-    
     public void BetAmountChanged(int amount)
     {
         if (OnBetAmountChanged != null)
@@ -69,54 +52,6 @@ public class EventsHandler : MonoBehaviour
         }
     }
     
-    public void PlayerTurn(EPlayer player)
-    {
-        if (OnPlayerTurn != null)
-        {
-            OnPlayerTurn(player);
-        }
-    }
-    
-    public void BettingObjectStarted()
-    {
-        if (OnBettingObjectStarted != null)
-        {
-            OnBettingObjectStarted();
-        }
-    }
-    
-    public void BettingObjectEnded()
-    {
-        if (OnBettingObjectEnded != null)
-        {
-            OnBettingObjectEnded();
-        }
-    }
-    
-    public void StackCreated()
-    {
-        if (OnStackCreated != null)
-        {
-            OnStackCreated();
-        }
-    }
-    
-    public void BetCanceled()
-    {
-        if (OnBetCanceled != null)
-        {
-            OnBetCanceled();
-        }
-    }
-    
-    public void ChangeColorRequest()
-    {
-        if (OnChangeColorRequested != null)
-        {
-            OnChangeColorRequested();
-        }
-    }
-    
     public void RemotePlayerPlacedBet()
     {
         if (OnRemotePlayerPlacedBet != null)
@@ -124,17 +59,4 @@ public class EventsHandler : MonoBehaviour
             OnRemotePlayerPlacedBet();
         }
     }
-}
-
-public enum EPlayer
-{
-    None = 0,
-    Player01 = 1,
-    Player02 = 2
-}
-
-public enum ERoundResult
-{
-    Win = 0,
-    Lose = 1,
 }
