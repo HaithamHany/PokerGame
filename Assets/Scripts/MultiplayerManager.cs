@@ -7,6 +7,9 @@ using TMPro;
 using UnityEngine;
 using Random = System.Random;
 
+/// <summary>
+/// Handling multiplayer aspect of the game using Photon engine
+/// </summary>
 public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
 {
     [SerializeField] private RectTransform _connectUiView;

@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Used to handle all custom game events
+/// </summary>
 public class EventsHandler : MonoBehaviour
 {
     private static EventsHandler _instance;

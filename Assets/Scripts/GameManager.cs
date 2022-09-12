@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// Handling Creating of core game
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     [Header("Stacks Generator")]
