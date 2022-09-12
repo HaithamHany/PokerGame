@@ -63,23 +63,55 @@ public class GameManager : MonoBehaviour
     
     private void PlaceBet(int amount)
     {
-        if (_currentLocalStack < MAX_STACKS_LIMIT )
+        if (_currentLocalStack >= MAX_STACKS_LIMIT - 1)
         {
-            _localBetPlacedAmount += amount;
-            UpdateVisual();
-            _localBettingStacks[_currentLocalStack].gameObject.SetActive(false);
-            _currentLocalStack++;
-            EventsHandler.Instance.BetAmountChanged(_localBetPlacedAmount);
+            UpdateLocalPlayer(amount);
+            TopPlayerStacks(ref _currentLocalStack, _localBettingStacks);
+            return;
+        }
+        
+        UpdateLocalPlayer(amount);
+    }
+
+    private void UpdateLocalPlayer(int amount)
+    {
+        _localBetPlacedAmount += amount;
+        UpdateVisual();
+        _localBettingStacks[_currentLocalStack].gameObject.SetActive(false);
+        _currentLocalStack++;
+        EventsHandler.Instance.BetAmountChanged(_localBetPlacedAmount);
+    }
+
+    private void UpdateRemotePlayer()
+    {
+        if (_currentRemoteStack < MAX_STACKS_LIMIT )
+        {
+            _remoteBettingStacks[_currentRemoteStack].gameObject.SetActive(false);
+            _currentRemoteStack++;
         }
     }
     
     
     private void RemotePlayerPlacedBet()
     {
-        if (_currentRemoteStack < MAX_STACKS_LIMIT )
+        if (_currentRemoteStack >= MAX_STACKS_LIMIT - 1)
         {
-            _remoteBettingStacks[_currentRemoteStack].gameObject.SetActive(false);
-            _currentRemoteStack++;
+            UpdateRemotePlayer();
+            TopPlayerStacks(ref _currentRemoteStack, _remoteBettingStacks);
+            return;
+        }
+
+        UpdateRemotePlayer();
+    }
+
+    private void TopPlayerStacks(ref int stackTracker, List<Stack> bettingStacks)
+    {
+        //Notify player more added
+        stackTracker = 0;
+        foreach (var stack in bettingStacks)
+        {
+            //reusing already instantiated stacks
+            stack.gameObject.SetActive(true); 
         }
     }
 
