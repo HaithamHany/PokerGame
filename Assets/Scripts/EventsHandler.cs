@@ -13,6 +13,7 @@ public class EventsHandler : MonoBehaviour
     public event Action<int> OnPlayerRemovedBet;
     public event Action<int> OnBetAmountChanged;
     public event Action OnRemotePlayerPlacedBet;
+    public event Action OnTurnStarted;
     public event Action OnAllBetsPlaced;
     public event Action<EPlayer> OnPlayerTurn;
     public event Action<ERoundResult> OnRoundDone;
@@ -60,11 +61,11 @@ public class EventsHandler : MonoBehaviour
         }
     }
 
-    public void AllBetsPlaced()
+    public void TurnStarted()
     {
-        if (OnAllBetsPlaced != null)
+        if (OnTurnStarted != null)
         {
-            OnAllBetsPlaced();
+            OnTurnStarted();
         }
     }
     

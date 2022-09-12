@@ -24,12 +24,14 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     [SerializeField] private TextMeshProUGUI _resultText;
     [SerializeField] private GameObject _remoteBetPlacedImage;
     [SerializeField] private GameObject _localBetPlacedImage;
+    [SerializeField] private TextMeshProUGUI _totalEarningsText;
     
     private PunTurnManager _turnManager;
     private float _timeCounter;
     private bool _isShowingResults;
     private int _remoteBet;
-    private int _LocalBetAmount;
+    private int _totalEarnings;
+    private int _accumilatedEarnings;
     private EBetObjectSide _localSelection;
     private EBetObjectSide _remoteSelection;
     private EBetObjectSide _coinSide;
@@ -52,6 +54,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         _remoteBetDisplay.gameObject.SetActive(false);
         RefreshUIViews();
         EventsHandler.Instance.OnBetAmountChanged += BetAmountChanged;
+        EventsHandler.Instance.OnPlayerPlacedBet += LocalBetPlaced;
     }
 
     private void Update()
@@ -165,7 +168,10 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
 
     public void OnTurnBegins(int turn)
     {
+
         Debug.Log("OnTurnBegins() turn: "+ turn);
+        EventsHandler.Instance.TurnStarted();
+        _totalEarnings = 0;
         _localBetPlacedImage.SetActive(false);
         _remoteBetPlacedImage.SetActive(false);
         _rotatingBetObject.gameObject.SetActive(false);
@@ -175,10 +181,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         _remoteSelection = EBetObjectSide.None;
 
         _resultText.gameObject.SetActive(false);
-
-        // this.localSelectionImage.gameObject.SetActive(false);
-        // this.remoteSelectionImage.gameObject.SetActive(true);
-
+        
         _isShowingResults = false;
         _bettingPanelCanvasGroup.interactable = true;
     }
@@ -288,10 +291,15 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
         {
             _resultText.text = $"DRAW!";
         }
-        
         else
         {
-            _resultText.text = _result == EResult.Win ? "YOU WIN!" : "YOU LOSE!";
+            _resultText.text = _result == EResult.Win ? $"YOU WIN! ${_totalEarnings}" : "YOU LOSE!";
+        }
+        
+        PhotonPlayer local = PhotonNetwork.player;
+        if (local != null && _result == EResult.Win)
+        {
+            _totalEarningsText.text = $"Total Earnings: ${_accumilatedEarnings += _totalEarnings}";
         }
         _resultText.gameObject.SetActive(true);
 
@@ -357,6 +365,7 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
             object[] data = (object[])content;
             var amount = (int)data[0];
             UpdateRemoteVisual(amount);
+            _totalEarnings += 10;
             EventsHandler.Instance.RemotePlayerPlacedBet();
         }
     }
@@ -431,7 +440,13 @@ public class MultiplayerManager : PunBehaviour, IPunTurnManagerCallbacks
     public void OnDisable()
     {
         PhotonNetwork.OnEventCall -= OnEvent;
-        EventsHandler.Instance.OnBetAmountChanged += BetAmountChanged;
+        EventsHandler.Instance.OnBetAmountChanged -= BetAmountChanged;
+        EventsHandler.Instance.OnPlayerPlacedBet -= LocalBetPlaced;
+    }
+
+    private void LocalBetPlaced(int amout)
+    {
+        _totalEarnings += amout;
     }
 
     private void BetAmountChanged(int amount)

@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
         
         EventsHandler.Instance.OnPlayerPlacedBet += PlaceBet;
         EventsHandler.Instance.OnRemotePlayerPlacedBet += RemotePlayerPlacedBet;
+        EventsHandler.Instance.OnTurnStarted += OnTurnStarted;
         GenerateStacks(LOCAL_X_OFFSET, LOCAL_Z_OFFSET, _localBettingStacks);
         GenerateStacks(REMOTE_X_OFFSET, REMOTE_Z_OFFSET, _remoteBettingStacks);
     }
@@ -119,10 +120,17 @@ public class GameManager : MonoBehaviour
     {
         _betAmountTxt.text = _localBetPlacedAmount.ToString();
     }
+    
+    private void OnTurnStarted()
+    {
+        _localBetPlacedAmount = 0;
+        UpdateVisual();
+    }
 
     private void OnDestroy()
     {
         EventsHandler.Instance.OnPlayerPlacedBet -= PlaceBet;
-        EventsHandler.Instance.OnRemotePlayerPlacedBet += RemotePlayerPlacedBet;
+        EventsHandler.Instance.OnRemotePlayerPlacedBet -= RemotePlayerPlacedBet;
+        EventsHandler.Instance.OnTurnStarted -= OnTurnStarted;
     }
 }
